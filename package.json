@@ -23,7 +23,7 @@
     "#utils/*": "./src/utils/*"
   },
   "keywords": [],
-  "author": "omancilla",
+  "author": "NexNova",
   "license": "ISC",
   "description": "",
   "dependencies": {

@@ -17,8 +17,8 @@ export const router = Router()
 router.get('/', (req, res) => {
   res.json({
     message: 'Welcome to the vet-sync API',
-    github: 'https://github.com/omancillav/vet-sync-api.git',
-    author: 'omancillav'
+    github: 'https://github.com/NexNovaUttec/vet-sync-api.git',
+    author: 'NexNova'
   })
 })
 
