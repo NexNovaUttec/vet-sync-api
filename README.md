@@ -6,15 +6,15 @@ API RESTful para la gestión de una clínica veterinaria. Permite administrar ci
 
 ## 📋 Tabla de Contenidos
 
-1.  [Acerca del Proyecto](#-acerca-del-proyecto)
-2.  [Tecnologías Utilizadas](#-tecnologías-utilizadas)
-3.  [Comenzando](#-comenzando)
-    *   [Pre-requisitos](#pre-requisitos)
-    *   [Instalación](#instalación)
-4.  [Uso](#-uso)
-5.  [Endpoints de la API](#-endpoints-de-la-api)
-6.  [Licencia](#-licencia)
-7.  [Autor](#-autor)
+1. [Acerca del Proyecto](#acerca-del-proyecto)
+2. [Tecnologías Utilizadas](#tecnologías-utilizadas)
+3. [Comenzando](#comenzando)
+   - [Pre-requisitos](#pre-requisitos)
+   - [Instalación](#instalación)
+4. [Uso](#uso)
+5. [Endpoints de la API](#endpoints-de-la-api)
+6. [Licencia](#licencia)
+7. [Organización](#organización)
 
 ---
 
@@ -53,21 +53,24 @@ Asegúrate de tener instalado Node.js en tu sistema.
 
 ### Instalación
 
-1.  **Clona el repositorio:**
+1. **Clona el repositorio:**
+
     ```sh
-    git clone https://github.com/omancillav/vet-plan-api.git
+    git clone https://github.com/NexNovaUttec/vet-sync-api.git
     ```
 
-2.  **Navega al directorio del proyecto:**
+2. **Navega al directorio del proyecto:**
+
     ```sh
-    cd vet-plan-api
+    cd vet-sync-api
     ```
 
 3.  **Instala las dependencias (recomendado usar pnpm):**
+
     ```sh
     # Usando pnpm (recomendado)
     pnpm install
-    
+
     # O usando npm
     # npm install
     ```
@@ -111,16 +114,16 @@ pnpm start
 
 La API expone los siguientes recursos. Las rutas marcadas con 🔒 requieren autenticación mediante un token JWT.
 
-*   `/auth`: Rutas para autenticación (login, registro).
-*   `/users`: Gestión de usuarios.
-*   `/services`: Gestión de servicios ofrecidos.
-*   🔒 `/species`: Gestión de especies de mascotas.
-*   🔒 `/breeds`: Gestión de razas de mascotas.
-*   🔒 `/pets`: Gestión de mascotas (pacientes).
-*   🔒 `/vets`: Gestión de veterinarios.
-*   🔒 `/schedules`: Gestión de horarios de los veterinarios.
-*   🔒 `/categories`: Gestión de categorías de servicios.
-*   🔒 `/appointments`: Gestión de citas.
+- `/auth`: Rutas para autenticación (login, registro).
+- `/users`: Gestión de usuarios.
+- `/services`: Gestión de servicios ofrecidos.
+- 🔒 `/species`: Gestión de especies de mascotas.
+- 🔒 `/breeds`: Gestión de razas de mascotas.
+- 🔒 `/pets`: Gestión de mascotas (pacientes).
+- 🔒 `/vets`: Gestión de veterinarios.
+- 🔒 `/schedules`: Gestión de horarios de los veterinarios.
+- 🔒 `/categories`: Gestión de categorías de servicios.
+- 🔒 `/appointments`: Gestión de citas.
 
 ---
 
@@ -130,6 +133,6 @@ Este proyecto está bajo la Licencia ISC. Consulta el archivo `LICENSE` para má
 
 ---
 
-## ✍️ Autor
+## ✍️ Organización
 
-*   **Omar Mancilla** - [omancilla](https://github.com/omancillav)
+*   **NexNova** - [NexNova](https://github.com/NexNovaUttec)
