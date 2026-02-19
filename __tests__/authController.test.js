@@ -1,5 +1,3 @@
-
-
 import { jest } from '@jest/globals'
 import { AuthController } from '../src/controllers/authController.js'
 import { userModel } from '../src/models/userModel.js'
@@ -49,7 +47,7 @@ describe('AuthController', () => {
       nombre: 'Juan Daniel ',
       apellido: 'Alvarado Pelcastre',
       telefono: '1234567890',
-        direcion: 'av. iaiiaaiiaiaia 123',
+      direcion: 'av. iaiiaaiiaiaia 123',
       rol: 'user',
       activo: true
     }])

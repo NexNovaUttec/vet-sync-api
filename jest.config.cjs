@@ -6,4 +6,4 @@ module.exports = {
     '^#schemas/(.*)$': '<rootDir>/src/schemas/$1'
   },
   verbose: true
-};
+}
