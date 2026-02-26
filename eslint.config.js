@@ -1,6 +1,6 @@
 export default [
   {
-    ignores: ['node_modules/', 'dist/', 'build/']
+    ignores: ['node_modules/', 'dist/', 'build/', 'jest.config.js']
   },
   {
     languageOptions: {
@@ -183,6 +183,27 @@ export default [
       // === UNICODES Y CARACTERES ===
       'unicode-bom': ['error', 'never'],
       'no-zero-width-space': 'off' // No existe en ESLint core
+    }
+  },
+
+  // Configuración específica para archivos de prueba (Jest)
+  {
+    files: ['**/*.test.{js,cjs}', '**/*.spec.{js,cjs}', '__tests__/**/*.{js,cjs}'],
+    languageOptions: {
+      globals: {
+        describe: 'readonly',
+        test: 'readonly',
+        it: 'readonly',
+        expect: 'readonly',
+        beforeEach: 'readonly',
+        afterEach: 'readonly',
+        beforeAll: 'readonly',
+        afterAll: 'readonly',
+        jest: 'readonly'
+      }
+    },
+    rules: {
+      'no-unused-expressions': 'off'
     }
   }
 ]
