@@ -32,4 +32,18 @@ export class AdminController {
 
     res.json({ message: 'Admin found', data: admin })
   }
+
+  static async updateAdmin (req, res) {
+    const { id } = req.params
+    const { data, error } = validatePartialAdmin(req.body)
+
+    if (error) return res.status(400).json({ error: error.flatten() })
+
+    try {
+      const admin = await adminModel.updateAdmin({ id, input: data })
+      return res.json({ message: 'Admin updated', data: admin })
+    } catch (error) {
+      return res.status(500).json({ error: error.message })
+    }
+  }
 }

@@ -46,4 +46,19 @@ export class adminModel {
 
     return admin
   }
+
+  static async updateAdmin ({ id, input }) {
+    try {
+      const { data: updatedAdmin, error } = await supabase
+        .from('administradores')
+        .update(input)
+        .eq('id', id)
+        .select()
+
+      if (error) throw new Error(error.message)
+      return updatedAdmin
+    } catch (error) {
+      throw new Error(error.message)
+    }
+  }
 }
