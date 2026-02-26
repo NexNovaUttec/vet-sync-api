@@ -8,8 +8,8 @@ adminRouter.post('/', AdminController.createAdmin)
 
 adminRouter.use(authenticateToken)
 
-adminRouter.get('/', AdminController.getAllAdmins)
-adminRouter.get('/:id', AdminController.getById)
+adminRouter.get('/', AdminController.getAdmins)
+// adminRouter.get('/:id', AdminController.getById)
 
-adminRouter.patch('/:id', AdminController.updateAdmin)
-adminRouter.delete('/:id', AdminController.deleteAdmin)
+// adminRouter.patch('/:id', AdminController.updateAdmin)
+// adminRouter.delete('/:id', AdminController.deleteAdmin)
