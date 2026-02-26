@@ -1,5 +1,6 @@
 import { userModel } from '#models/userModel.js'
 import { validateUser } from '#schemas/userSchema.js'
+import { validateUserEmail } from '#services/userValidation.js'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import crypto from 'crypto'
@@ -15,10 +16,9 @@ export class AuthController {
     const { email } = data
 
     try {
-      const existingUser = await userModel.getAllUsers({ email })
-      if (existingUser.length > 0) {
-        return res.status(409).json({ message: 'Email already registered' })
-      }
+      const { error: emailError } = await validateUserEmail(email)
+
+      if (emailError) return res.status(409).json({ message: emailError })
 
       const newUserArr = await userModel.createUser({ input: data })
       const newUser = newUserArr[0]
