@@ -49,16 +49,42 @@ export class adminModel {
 
   static async updateAdmin ({ id, input }) {
     try {
-      const { data: updatedAdmin, error } = await supabase
-        .from('administradores')
-        .update(input)
-        .eq('id', id)
-        .select()
+      const { data: updatedAdmin, error } = await supabase.from('administradores').update(input).eq('id', id).select()
 
       if (error) throw new Error(error.message)
       return updatedAdmin
     } catch (error) {
       throw new Error(error.message)
+    }
+  }
+
+  static async deleteAdmin ({ id }) {
+    try {
+      const { error } = await supabase.from('administradores').update({ activo: false }).eq('id', id)
+
+      if (error) throw new Error(error.message)
+
+      await this.deleteAllAdminRefreshTokens({ userId: id })
+
+      const deletedAdmin = await this.getById({ id })
+      return deletedAdmin
+    } catch (error) {
+      throw new Error(error.message)
+    }
+  }
+
+  static async deleteAllAdminRefreshTokens ({ userId }) {
+    try {
+      const { error } = await supabase.from('admin_refresh_tokens').delete().eq('user_id', userId)
+
+      if (error) {
+        throw error
+      }
+
+      return true
+    } catch (error) {
+      console.error('Error deleting admin refresh tokens:', error.message)
+      return false
     }
   }
 }

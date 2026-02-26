@@ -46,4 +46,15 @@ export class AdminController {
       return res.status(500).json({ error: error.message })
     }
   }
+
+  static async deleteAdmin (req, res) {
+    const { id } = req.params
+
+    try {
+      const deletedAdmin = await adminModel.deleteAdmin({ id })
+      return res.json({ message: 'Admin deleted', data: deletedAdmin })
+    } catch (error) {
+      return res.status(500).json({ error: error.message })
+    }
+  }
 }

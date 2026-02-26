@@ -12,4 +12,4 @@ adminRouter.get('/', AdminController.getAdmins)
 adminRouter.get('/:id', AdminController.getById)
 
 adminRouter.patch('/:id', AdminController.updateAdmin)
-// adminRouter.delete('/:id', AdminController.deleteAdmin)
+adminRouter.delete('/:id', AdminController.deleteAdmin)
