@@ -1,6 +1,6 @@
 import { userModel } from '#models/userModel.js'
 import { validateUser } from '#schemas/userSchema.js'
-import bcrypt from 'bcrypt'
+import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import crypto from 'crypto'
 
@@ -30,17 +30,9 @@ export class AuthController {
         apellido: newUser.apellido
       }
 
-      const accessToken = jwt.sign(
-        payload,
-        newUser.jwt_secret,
-        { expiresIn: '1h' }
-      )
+      const accessToken = jwt.sign(payload, newUser.jwt_secret, { expiresIn: '1h' })
 
-      const refreshToken = jwt.sign(
-        { id: newUser.id },
-        newUser.jwt_secret,
-        { expiresIn: '7d' }
-      )
+      const refreshToken = jwt.sign({ id: newUser.id }, newUser.jwt_secret, { expiresIn: '7d' })
 
       // Guardar el refresh token en la tabla dedicada
       await userModel.createRefreshToken({ userId: newUser.id, token: refreshToken })
@@ -92,18 +84,10 @@ export class AuthController {
       }
 
       // Generar access token (corta duración)
-      const accessToken = jwt.sign(
-        payload,
-        userJwtSecret,
-        { expiresIn: '1h' }
-      )
+      const accessToken = jwt.sign(payload, userJwtSecret, { expiresIn: '1h' })
 
       // Generar refresh token (larga duración)
-      const refreshToken = jwt.sign(
-        { id: user[0].id },
-        userJwtSecret,
-        { expiresIn: '7d' }
-      )
+      const refreshToken = jwt.sign({ id: user[0].id }, userJwtSecret, { expiresIn: '7d' })
 
       // Guardar refresh token en la tabla dedicada
       await userModel.createRefreshToken({
@@ -175,18 +159,10 @@ export class AuthController {
         }
 
         // Generar nuevo access token
-        const newAccessToken = jwt.sign(
-          payload,
-          userData.jwt_secret,
-          { expiresIn: '1h' }
-        )
+        const newAccessToken = jwt.sign(payload, userData.jwt_secret, { expiresIn: '1h' })
 
         // Generar nuevo refresh token (rotación de tokens)
-        const newRefreshToken = jwt.sign(
-          { id: userData.id },
-          userData.jwt_secret,
-          { expiresIn: '7d' }
-        )
+        const newRefreshToken = jwt.sign({ id: userData.id }, userData.jwt_secret, { expiresIn: '7d' })
 
         // Usar transacción para evitar condiciones de carrera
         try {
@@ -280,11 +256,7 @@ export class AuthController {
         nombre: user[0].nombre
       }
 
-      const token = jwt.sign(
-        payload,
-        userJwtSecret,
-        { expiresIn: expiration }
-      )
+      const token = jwt.sign(payload, userJwtSecret, { expiresIn: expiration })
 
       res.json({ token, expiration })
     } catch (error) {

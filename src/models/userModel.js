@@ -1,5 +1,5 @@
 import { supabase } from '#databases/index.js'
-import bcrypt from 'bcrypt'
+import bcrypt from 'bcryptjs'
 import crypto from 'crypto'
 
 export class userModel {
@@ -10,15 +10,18 @@ export class userModel {
     const jwtSecret = crypto.randomBytes(64).toString('hex')
 
     try {
-      const { data: user, error } = await supabase.from('usuarios').insert({
-        nombre,
-        apellido,
-        email,
-        telefono,
-        direccion: direccion || '',
-        password: hashedPassword,
-        jwt_secret: jwtSecret
-      }).select()
+      const { data: user, error } = await supabase
+        .from('usuarios')
+        .insert({
+          nombre,
+          apellido,
+          email,
+          telefono,
+          direccion: direccion || '',
+          password: hashedPassword,
+          jwt_secret: jwtSecret
+        })
+        .select()
 
       if (error) throw new Error(error.message)
 
@@ -76,7 +79,8 @@ export class userModel {
 
       if (error) {
         // Si es un error de duplicado, intentar obtener el token existente
-        if (error.code === '23505') { // Código de error de violación de restricción única
+        if (error.code === '23505') {
+          // Código de error de violación de restricción única
           const { data: existing } = await supabase
             .from('refresh_tokens')
             .select()
@@ -120,10 +124,7 @@ export class userModel {
     try {
       const tokenHash = crypto.createHash('sha256').update(token).digest('hex')
 
-      const { error } = await supabase
-        .from('refresh_tokens')
-        .delete()
-        .eq('token_hash', tokenHash)
+      const { error } = await supabase.from('refresh_tokens').delete().eq('token_hash', tokenHash)
 
       if (error) {
         throw error
@@ -138,10 +139,7 @@ export class userModel {
 
   static async deleteAllUserRefreshTokens ({ userId }) {
     try {
-      const { error } = await supabase
-        .from('refresh_tokens')
-        .delete()
-        .eq('user_id', userId)
+      const { error } = await supabase.from('refresh_tokens').delete().eq('user_id', userId)
 
       if (error) {
         throw error
@@ -156,11 +154,7 @@ export class userModel {
 
   static async updateUserSecret ({ id, jwt_secret }) {
     try {
-      const { data: user, error } = await supabase
-        .from('usuarios')
-        .update({ jwt_secret })
-        .eq('id', id)
-        .select()
+      const { data: user, error } = await supabase.from('usuarios').update({ jwt_secret }).eq('id', id).select()
 
       if (error) throw new Error(error.message)
 
@@ -201,10 +195,7 @@ export class userModel {
   static async deleteUser ({ id }) {
     try {
       // Primero desactivar el usuario
-      const { error } = await supabase
-        .from('usuarios')
-        .update({ activo: false })
-        .eq('id', id)
+      const { error } = await supabase.from('usuarios').update({ activo: false }).eq('id', id)
 
       if (error) throw new Error(error.message)
 
