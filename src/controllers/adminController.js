@@ -23,4 +23,13 @@ export class AdminController {
 
     res.json({ data: admins })
   }
+
+  static async getById (req, res) {
+    const { id } = req.params
+    const admin = await adminModel.getById({ id })
+
+    if (admin.length === 0) return res.status(404).json({ error: 'Admin not found' })
+
+    res.json({ message: 'Admin found', data: admin })
+  }
 }

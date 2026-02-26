@@ -33,11 +33,17 @@ export class adminModel {
     if (email) {
       query = query.eq('email', email)
     }
-
     const { data: admins, error } = await query
 
     if (error) throw new Error(error.message)
 
     return admins
+  }
+
+  static async getById ({ id }) {
+    const { data: admin, error } = await supabase.from('administradores').select('*').eq('id', id)
+    if (error) throw new Error(error.message)
+
+    return admin
   }
 }
