@@ -1,6 +1,5 @@
 import { Router } from 'express'
 import { BreedsController } from '#controllers/breedsController.js'
-
 export const breedsRouter = Router()
 
 breedsRouter.get('/', BreedsController.getAllBreeds)
