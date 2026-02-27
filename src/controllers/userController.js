@@ -1,5 +1,6 @@
 import { validateUser, validatePartialUser } from '#schemas/userSchema.js'
 import { userModel } from '#models/userModel.js'
+import { validateUserEmail } from '#services/userValidation.js'
 
 export class UserController {
   static async createUser (req, res) {
@@ -9,7 +10,13 @@ export class UserController {
       return res.status(422).json({ error: JSON.parse(error.message) })
     }
 
+    const { email } = data
+
     try {
+      const { error: emailError } = await validateUserEmail(email)
+
+      if (emailError) return res.status(409).json({ message: emailError })
+
       const user = await userModel.createUser({ input: data })
       return res.status(201).json({ message: 'User created', data: user })
     } catch (error) {
@@ -48,6 +55,13 @@ export class UserController {
     }
 
     try {
+      if (data.email) {
+        const { error: emailError } = await validateUserEmail(data.email, id)
+        if (emailError) {
+          return res.status(409).json({ message: emailError })
+        }
+      }
+
       const updatedUser = await userModel.updateUser({ id, input: data })
 
       if (updatedUser.length === 0) {

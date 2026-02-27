@@ -1,5 +1,6 @@
 import { validateAdmin, validatePartialAdmin } from '../schemas/adminSchema.js'
 import { adminModel } from '../models/adminModel.js'
+import { validateAdminEmail } from '../services/adminValidation.js'
 
 export class AdminController {
   static async createAdmin (req, res) {
@@ -7,7 +8,13 @@ export class AdminController {
 
     if (error) return res.status(400).json({ error: error.flatten() })
 
+    const { email } = data
+
     try {
+      const { error: emailError } = await validateAdminEmail(email)
+
+      if (emailError) return res.status(409).json({ message: emailError })
+
       const admin = await adminModel.createAdmin({ input: data })
       return res.status(201).json({ message: 'Admin created', data: admin })
     } catch (error) {
@@ -40,6 +47,13 @@ export class AdminController {
     if (error) return res.status(400).json({ error: error.flatten() })
 
     try {
+      if (data.email) {
+        const { error: emailError } = await validateAdminEmail(data.email, id)
+        if (emailError) {
+          return res.status(409).json({ message: emailError })
+        }
+      }
+
       const admin = await adminModel.updateAdmin({ id, input: data })
       return res.json({ message: 'Admin updated', data: admin })
     } catch (error) {

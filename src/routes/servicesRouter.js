@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { ServiceController } from '#controllers/serviceController.js'
-import { authenticateToken } from '#middlewares/auth.js'
+import { authenticateToken, requireAdmin } from '#middlewares/auth.js'
 import { ServiceImageController } from '#controllers/serviceImageController.js'
 import { imageMiddleware } from '../middlewares/multer.js'
 
@@ -13,11 +13,11 @@ servicesRouter.get('/active/:active', ServiceController.getActiveServices)
 
 servicesRouter.use(authenticateToken)
 
-servicesRouter.post('/', ServiceController.addService)
+servicesRouter.post('/', requireAdmin, ServiceController.addService)
 
-servicesRouter.patch('/:id', ServiceController.updateService)
-servicesRouter.delete('/:id', ServiceController.deleteService)
+servicesRouter.patch('/:id', requireAdmin, ServiceController.updateService)
+servicesRouter.delete('/:id', requireAdmin, ServiceController.deleteService)
 
-servicesRouter.post('/:id/imagen', imageMiddleware, ServiceImageController.uploadImage)
-servicesRouter.delete('/:id/imagen', ServiceImageController.removeImage)
+servicesRouter.post('/:id/imagen', requireAdmin, imageMiddleware, ServiceImageController.uploadImage)
+servicesRouter.delete('/:id/imagen', requireAdmin, ServiceImageController.removeImage)
 servicesRouter.get('/:id/imagen', ServiceImageController.getImageInfo)
