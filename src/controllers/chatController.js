@@ -14,7 +14,8 @@ Si te preguntan algo fuera de estos temas (política, código, temas no relacion
 No des diagnósticos médicos específicos; en esos casos, siempre recomienda visitar a un veterinario.
 Máximo 3 párrafos por respuesta.`
 
-const FALLBACK_RESPONSE = 'Gracias por tu mensaje. En este momento no puedo procesar tu consulta en detalle, pero puedo ayudarte con temas como agendar citas, registrar mascotas, cuidados generales y más. ¿Podrías reformular tu pregunta o elegir uno de estos temas?'
+const FALLBACK_RESPONSE =
+  'Gracias por tu mensaje. En este momento no puedo procesar tu consulta en detalle, pero puedo ayudarte con temas como agendar citas, registrar mascotas, cuidados generales y más. ¿Podrías reformular tu pregunta o elegir uno de estos temas?'
 
 const MAX_RETRIES = 2
 const RETRY_DELAY_MS = 4000
@@ -43,7 +44,7 @@ const isRateLimitError = (error) => {
   )
 }
 
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+const sleep = (ms) => new Promise((resolve) => { globalThis.setTimeout(resolve, ms) })
 
 const callGemini = async (message, formattedHistory) => {
   const ai = getGenAI()
@@ -54,19 +55,19 @@ const callGemini = async (message, formattedHistory) => {
     systemInstruction: SYSTEM_PROMPT
   })
 
-  let lastError
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     try {
       const chat = model.startChat({ history: formattedHistory })
+      // eslint-disable-next-line no-await-in-loop
       const result = await chat.sendMessage(message)
       return result.response.text()
     } catch (error) {
-      lastError = error
       console.warn(`[ChatController] Gemini intento ${attempt}/${MAX_RETRIES}:`, {
         status: error?.status,
         message: error?.message?.slice(0, 120)
       })
       if (isRateLimitError(error) && attempt < MAX_RETRIES) {
+        // eslint-disable-next-line no-await-in-loop
         await sleep(RETRY_DELAY_MS * attempt)
         continue
       }
