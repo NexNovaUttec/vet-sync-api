@@ -12,6 +12,7 @@ import { scheduleRouter } from '#routes/scheduleRouter.js'
 import { servicesRouter } from '#routes/servicesRouter.js'
 import { categoriesRouter } from '#routes/categoriesRouter.js'
 import { appointmentsRouter } from '#routes/appointmentsRouter.js'
+import { chatRouter } from '#routes/chatRouter.js'
 
 export const router = Router()
 
@@ -29,6 +30,7 @@ router.use('/users', userRouter)
 router.use('/admin', adminRouter)
 router.use('/auth', authRouter)
 router.use('/services', servicesRouter)
+router.use('/chat', chatRouter)
 
 router.use(authenticateToken)
 
