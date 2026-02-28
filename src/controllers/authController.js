@@ -1,6 +1,7 @@
 import { userModel } from '#models/userModel.js'
 import { validateUser } from '#schemas/userSchema.js'
-import bcrypt from 'bcrypt'
+import { validateUserEmail } from '#services/userValidation.js'
+import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import crypto from 'crypto'
 
@@ -15,10 +16,9 @@ export class AuthController {
     const { email } = data
 
     try {
-      const existingUser = await userModel.getAllUsers({ email })
-      if (existingUser.length > 0) {
-        return res.status(409).json({ message: 'Email already registered' })
-      }
+      const { error: emailError } = await validateUserEmail(email)
+
+      if (emailError) return res.status(409).json({ message: emailError })
 
       const newUserArr = await userModel.createUser({ input: data })
       const newUser = newUserArr[0]
@@ -30,17 +30,9 @@ export class AuthController {
         apellido: newUser.apellido
       }
 
-      const accessToken = jwt.sign(
-        payload,
-        newUser.jwt_secret,
-        { expiresIn: '1h' }
-      )
+      const accessToken = jwt.sign(payload, newUser.jwt_secret, { expiresIn: '1h' })
 
-      const refreshToken = jwt.sign(
-        { id: newUser.id },
-        newUser.jwt_secret,
-        { expiresIn: '7d' }
-      )
+      const refreshToken = jwt.sign({ id: newUser.id }, newUser.jwt_secret, { expiresIn: '7d' })
 
       // Guardar el refresh token en la tabla dedicada
       await userModel.createRefreshToken({ userId: newUser.id, token: refreshToken })
@@ -60,7 +52,16 @@ export class AuthController {
     const { email, password } = req.body
 
     try {
-      const user = await userModel.getAllUsers({ email })
+      let user = await userModel.getAllUsers({ email })
+      let role = 'user'
+      let model = userModel
+
+      if (user.length === 0) {
+        const { adminModel } = await import('#models/adminModel.js')
+        user = await adminModel.getAdmins({ email })
+        role = 'admin'
+        model = adminModel
+      }
 
       if (user.length === 0) {
         return res.status(404).json({ message: 'Email not found' })
@@ -81,40 +82,46 @@ export class AuthController {
       let userJwtSecret = user[0].jwt_secret
       if (!userJwtSecret) {
         userJwtSecret = crypto.randomBytes(64).toString('hex')
-        await userModel.updateUserSecret({ id: user[0].id, jwt_secret: userJwtSecret })
+        if (role === 'user') {
+          await model.updateUserSecret({ id: user[0].id, jwt_secret: userJwtSecret })
+        } else {
+          await model.updateAdmin({ id: user[0].id, input: { jwt_secret: userJwtSecret } })
+        }
       }
 
       const payload = {
         id: user[0].id,
         email: user[0].email,
         nombre: user[0].nombre,
-        apellido: user[0].apellido
+        apellido: user[0].apellido,
+        role
       }
 
       // Generar access token (corta duración)
-      const accessToken = jwt.sign(
-        payload,
-        userJwtSecret,
-        { expiresIn: '1h' }
-      )
+      const accessToken = jwt.sign(payload, userJwtSecret, { expiresIn: '1h' })
 
       // Generar refresh token (larga duración)
-      const refreshToken = jwt.sign(
-        { id: user[0].id },
-        userJwtSecret,
-        { expiresIn: '7d' }
-      )
+      const refreshToken = jwt.sign({ id: user[0].id, role }, userJwtSecret, { expiresIn: '7d' })
 
       // Guardar refresh token en la tabla dedicada
-      await userModel.createRefreshToken({
-        userId: user[0].id,
-        token: refreshToken
-      })
+      if (role === 'user') {
+        await model.createRefreshToken({
+          userId: user[0].id,
+          token: refreshToken
+        })
+      } else {
+        const { supabase } = await import('../database/index.js')
+        await supabase.from('admin_refresh_tokens').insert({
+          admin_id: user[0].id,
+          token_hash: refreshToken
+        })
+      }
 
       res.json({
         accessToken,
         refreshToken,
-        expiresIn: '1h'
+        expiresIn: '1h',
+        role
       })
     } catch (e) {
       console.error(e)
@@ -175,18 +182,10 @@ export class AuthController {
         }
 
         // Generar nuevo access token
-        const newAccessToken = jwt.sign(
-          payload,
-          userData.jwt_secret,
-          { expiresIn: '1h' }
-        )
+        const newAccessToken = jwt.sign(payload, userData.jwt_secret, { expiresIn: '1h' })
 
         // Generar nuevo refresh token (rotación de tokens)
-        const newRefreshToken = jwt.sign(
-          { id: userData.id },
-          userData.jwt_secret,
-          { expiresIn: '7d' }
-        )
+        const newRefreshToken = jwt.sign({ id: userData.id }, userData.jwt_secret, { expiresIn: '7d' })
 
         // Usar transacción para evitar condiciones de carrera
         try {
@@ -280,11 +279,7 @@ export class AuthController {
         nombre: user[0].nombre
       }
 
-      const token = jwt.sign(
-        payload,
-        userJwtSecret,
-        { expiresIn: expiration }
-      )
+      const token = jwt.sign(payload, userJwtSecret, { expiresIn: expiration })
 
       res.json({ token, expiration })
     } catch (error) {

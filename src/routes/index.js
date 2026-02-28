@@ -2,6 +2,7 @@ import { Router } from 'express'
 import { authenticateToken } from '#middlewares/auth.js'
 import { validateApiKey } from '#middlewares/apiKey.js'
 import { userRouter } from '#routes/userRouter.js'
+import { adminRouter } from '#routes/adminRouter.js'
 import { authRouter } from '#routes/authRouter.js'
 import { petRouter } from '#routes/petRouter.js'
 import { speciesRouter } from '#routes/speciesRouter.js'
@@ -26,6 +27,7 @@ router.get('/', (req, res) => {
 router.use(validateApiKey)
 
 router.use('/users', userRouter)
+router.use('/admin', adminRouter)
 router.use('/auth', authRouter)
 router.use('/services', servicesRouter)
 router.use('/chat', chatRouter)
