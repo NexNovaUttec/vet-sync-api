@@ -67,7 +67,20 @@ export class serviceModel {
     if (input.precio) updateData.precio = input.precio
     if (input.duracion_estimada) updateData.duracion_estimada = input.duracion_estimada
     if (input.categoria_id) updateData.categoria_id = input.categoria_id
-    if (input.img_url !== undefined) updateData.img_url = input.img_url // Permite null para eliminar imagen
+    if (input.activo !== undefined) updateData.activo = input.activo
+
+    if (input.img_url !== undefined) {
+      if (input.img_url === null || input.img_url === 'null') {
+        const currentService = await this.getById({ id })
+        if (currentService[0]?.img_url) {
+          const fileName = currentService[0].img_url.split('/').pop()
+          await this.deleteImageFromStorage({ fileName })
+        }
+        updateData.img_url = null
+      } else {
+        updateData.img_url = input.img_url
+      }
+    }
 
     if (Object.keys(updateData).length === 0) {
       return await this.getById({ id })
