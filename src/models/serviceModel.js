@@ -67,7 +67,20 @@ export class serviceModel {
     if (input.precio) updateData.precio = input.precio
     if (input.duracion_estimada) updateData.duracion_estimada = input.duracion_estimada
     if (input.categoria_id) updateData.categoria_id = input.categoria_id
-    if (input.img_url !== undefined) updateData.img_url = input.img_url // Permite null para eliminar imagen
+    if (input.activo !== undefined) updateData.activo = input.activo
+
+    if (input.img_url !== undefined) {
+      if (input.img_url === null || input.img_url === 'null') {
+        const currentService = await this.getById({ id })
+        if (currentService[0]?.img_url) {
+          const fileName = currentService[0].img_url.split('/').pop()
+          await this.deleteImageFromStorage({ fileName })
+        }
+        updateData.img_url = null
+      } else {
+        updateData.img_url = input.img_url
+      }
+    }
 
     if (Object.keys(updateData).length === 0) {
       return await this.getById({ id })
@@ -86,8 +99,7 @@ export class serviceModel {
 
   static async deleteService ({ id }) {
     try {
-      const { data: service, error } = await supabase.from('servicios')
-        .update({ activo: false }).eq('id', id).select()
+      const { data: service, error } = await supabase.from('servicios').delete().eq('id', id).select()
 
       if (error) throw error
 
@@ -112,19 +124,17 @@ export class serviceModel {
       }
 
       // Subir nueva imagen a Supabase Storage
-      const { error } = await supabase.storage
-        .from('servicios-imagenes')
-        .upload(fileName, file.buffer, {
-          contentType: file.mimetype,
-          upsert: false
-        })
+      const { error } = await supabase.storage.from('servicios-imagenes').upload(fileName, file.buffer, {
+        contentType: file.mimetype,
+        upsert: false
+      })
 
       if (error) throw error
 
       // Obtener la URL pública
-      const { data: { publicUrl } } = supabase.storage
-        .from('servicios-imagenes')
-        .getPublicUrl(fileName)
+      const {
+        data: { publicUrl }
+      } = supabase.storage.from('servicios-imagenes').getPublicUrl(fileName)
 
       // Actualizar el servicio con la nueva URL
       const updatedService = await this.updateService({
@@ -173,9 +183,7 @@ export class serviceModel {
 
   static async deleteImageFromStorage ({ fileName }) {
     try {
-      const { error } = await supabase.storage
-        .from('servicios-imagenes')
-        .remove([fileName])
+      const { error } = await supabase.storage.from('servicios-imagenes').remove([fileName])
 
       if (error) throw error
 
@@ -189,11 +197,10 @@ export class serviceModel {
 
   static async getBlockedSlots ({ servicio_id, fecha }) {
     try {
-      const { data: blockedSlots, error } = await supabase
-        .rpc('get_blocked_slots_for_day', {
-          p_servicio_id: parseInt(servicio_id),
-          p_fecha: fecha
-        })
+      const { data: blockedSlots, error } = await supabase.rpc('get_blocked_slots_for_day', {
+        p_servicio_id: parseInt(servicio_id),
+        p_fecha: fecha
+      })
 
       if (error) throw error
 

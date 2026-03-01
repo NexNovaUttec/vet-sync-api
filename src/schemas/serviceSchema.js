@@ -38,10 +38,15 @@ const ServiceSchema = z.object({
     .int('La duración estimada debe ser un número entero')
     .positive('La duración estimada debe ser un número positivo'),
 
-  img_url: z.string()
-    .url('La URL de la imagen debe ser válida')
-    .nullable()
-    .optional()
+  img_url: z.union([
+    z.string().url('La URL de la imagen debe ser válida'),
+    z.literal('null'),
+    z.null()
+  ]).optional(),
+
+  activo: z.boolean({
+    invalid_type_error: 'El estado activo debe ser un valor booleano'
+  }).optional()
 })
 
 export function validateService (object) {
