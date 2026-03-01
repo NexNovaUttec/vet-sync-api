@@ -64,7 +64,7 @@ export class adminModel {
 
       if (error) throw new Error(error.message)
 
-      await this.deleteAllAdminRefreshTokens({ userId: id })
+      await this.deleteAllAdminRefreshTokens({ adminId: id })
 
       const deletedAdmin = await this.getById({ id })
       return deletedAdmin
@@ -73,9 +73,92 @@ export class adminModel {
     }
   }
 
-  static async deleteAllAdminRefreshTokens ({ userId }) {
+  static async createRefreshToken ({ adminId, token }) {
     try {
-      const { error } = await supabase.from('admin_refresh_tokens').delete().eq('user_id', userId)
+      const tokenHash = crypto.createHash('sha256').update(token).digest('hex')
+
+      const { data: existingToken } = await supabase
+        .from('admin_refresh_tokens')
+        .select('id')
+        .eq('token_hash', tokenHash)
+        .single()
+
+      if (existingToken) {
+        return existingToken
+      }
+
+      const { data, error } = await supabase
+        .from('admin_refresh_tokens')
+        .insert([{
+          admin_id: adminId,
+          token_hash: tokenHash
+        }])
+        .select()
+
+      if (error) {
+        if (error.code === '23505') {
+          const { data: existing } = await supabase
+            .from('admin_refresh_tokens')
+            .select()
+            .eq('token_hash', tokenHash)
+            .single()
+
+          if (existing) return existing
+        }
+        throw new Error(error.message)
+      }
+
+      return data[0]
+    } catch (error) {
+      console.error('Error in createRefreshToken (admin):', error.message)
+      throw new Error('Error creating admin refresh token')
+    }
+  }
+
+  static async getRefreshToken ({ token }) {
+    try {
+      const tokenHash = crypto.createHash('sha256').update(token).digest('hex')
+
+      const { data, error } = await supabase
+        .from('admin_refresh_tokens')
+        .select('*, administradores(*)')
+        .eq('token_hash', tokenHash)
+        .single()
+
+      if (error) {
+        throw error
+      }
+
+      return data
+    } catch (error) {
+      console.error('Error getting admin refresh token:', error.message)
+      return null
+    }
+  }
+
+  static async deleteRefreshToken ({ token }) {
+    try {
+      const tokenHash = crypto.createHash('sha256').update(token).digest('hex')
+
+      const { error } = await supabase
+        .from('admin_refresh_tokens')
+        .delete()
+        .eq('token_hash', tokenHash)
+
+      if (error) {
+        throw error
+      }
+
+      return true
+    } catch (error) {
+      console.error('Error deleting admin refresh token:', error.message)
+      return false
+    }
+  }
+
+  static async deleteAllAdminRefreshTokens ({ adminId }) {
+    try {
+      const { error } = await supabase.from('admin_refresh_tokens').delete().eq('admin_id', adminId)
 
       if (error) {
         throw error
