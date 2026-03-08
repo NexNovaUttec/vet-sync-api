@@ -11,3 +11,5 @@ vetRouter.get('/:id', VetController.getById)
 
 vetRouter.patch('/:id', requireAdmin, VetController.updateVet)
 vetRouter.delete('/:id', requireAdmin, VetController.deleteVet)
+
+vetRouter.post('/:id/categories', requireAdmin, VetController.assignCategories)
