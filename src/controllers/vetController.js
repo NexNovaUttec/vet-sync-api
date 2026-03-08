@@ -75,4 +75,20 @@ export class VetController {
       return res.status(500).json({ error: error.message })
     }
   }
+
+  static async assignCategories (req, res) {
+    const { id } = req.params
+    const { categories } = req.body
+
+    if (!Array.isArray(categories)) {
+      return res.status(422).json({ error: 'categories must be an array of IDs' })
+    }
+
+    try {
+      const updatedVet = await vetModel.assignCategories({ id, categories })
+      res.json({ message: 'Categories assigned', data: updatedVet })
+    } catch (error) {
+      return res.status(500).json({ error: error.message })
+    }
+  }
 }
