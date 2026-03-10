@@ -1,5 +1,5 @@
 import { supabase } from '#root/src/database/index.js'
-import { predictNoShowRisk, predictDailyRevenue } from '#services/ml.service.js'
+import { predictNoShowRisk, predictDailyRevenue, predictDailyDemand } from '#services/ml.service.js'
 
 export const getNoShowRiskController = async (req, res) => {
   try {
@@ -145,5 +145,68 @@ export const getRevenueForecastController = async (req, res) => {
   } catch (error) {
     console.error('Error calculando pronóstico de ingresos:', error)
     return res.status(500).json({ success: false, message: 'Error interno al generar pronóstico.', error: error.message })
+  }
+}
+
+export const getDemandForecastController = async (req, res) => {
+  try {
+    const today = new Date()
+    const offset = today.getTimezoneOffset()
+    const localToday = new Date(today.getTime() - (offset * 60 * 1000))
+
+    // We will predict the next 14 days of demand
+    const daysToPredict = 14
+    const datesToPredict = []
+
+    for (let i = 0; i < daysToPredict; i++) {
+      const futureDate = new Date(localToday)
+      futureDate.setDate(localToday.getDate() + i)
+      datesToPredict.push(futureDate)
+    }
+
+    // Call ML prediction linearly or in parallel
+    const dailyForecasts = await Promise.all(
+      datesToPredict.map(date => predictDailyDemand(date))
+    )
+
+    // Aggregate category counts across the 14 days
+    const categoryTotals = {}
+
+    dailyForecasts.forEach(forecastArray => {
+      // forecastArray is [{ category: 'Estética', expectedVol: 2.1 }, ...]
+      forecastArray.forEach(item => {
+        if (!categoryTotals[item.category]) {
+          categoryTotals[item.category] = 0
+        }
+        categoryTotals[item.category] += item.expectedVol
+      })
+    })
+
+    const totalExpectedServices = Object.values(categoryTotals).reduce((a, b) => a + b, 0)
+
+    const formattedData = Object.keys(categoryTotals).map(category => {
+      const vol = categoryTotals[category]
+      const percentage = totalExpectedServices > 0 ? (vol / totalExpectedServices) * 100 : 0
+      return {
+        category,
+        expectedVol: parseFloat(vol.toFixed(1)),
+        percentage: parseFloat(percentage.toFixed(1))
+      }
+    })
+
+    // Sort by most demanded
+    formattedData.sort((a, b) => b.expectedVol - a.expectedVol)
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        timeframeDays: daysToPredict,
+        totalExpectedServices: parseFloat(totalExpectedServices.toFixed(1)),
+        distribution: formattedData
+      }
+    })
+  } catch (error) {
+    console.error('Error calculando pronóstico de demanda:', error)
+    return res.status(500).json({ success: false, message: 'Error interno al generar pronóstico de demanda.', error: error.message })
   }
 }

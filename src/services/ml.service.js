@@ -3,7 +3,11 @@ import { supabase } from '../database/index.js'
 
 let noShowModel = null
 let revenueModel = null
+let demandModel = null
+
 let revenueScaler = 50000 // default scaler fallback
+let demandScaler = 50 // default scaler fallback
+let demandCategories = [] // mappings for neural net outputs
 
 /**
 /**
@@ -103,6 +107,50 @@ export const loadRevenueModel = async () => {
 }
 
 /**
+ * Initializes and loads the pre-trained Demand model into memory from Supabase Storage.
+ */
+export const loadDemandModel = async () => {
+  try {
+    console.log('[ML Service] Fetching Demand model from Supabase Storage...')
+
+    const { data: modelData, error: modelError } = await supabase.storage
+      .from('ml-models')
+      .download('demand/model.json')
+
+    const { data: weightData, error: weightError } = await supabase.storage
+      .from('ml-models')
+      .download('demand/weights.bin')
+
+    if (modelError || weightError || !modelData || !weightData) {
+      console.warn('[ML Service] Demand model files not found.')
+      return false
+    }
+
+    const modelJsonText = await modelData.text()
+    const weightArrayBuffer = await weightData.arrayBuffer()
+
+    // Parse to extract the mapping from metadata
+    try {
+      const parsedJson = JSON.parse(modelJsonText)
+      const generatedByStr = parsedJson.generatedBy || '{}'
+      const metadata = JSON.parse(generatedByStr)
+      if (metadata.scaler) demandScaler = metadata.scaler
+      if (metadata.categories) demandCategories = metadata.categories
+    } catch (e) {
+      console.warn('[ML Service] Could not parse metadata from Demand model, using default.', e)
+    }
+
+    console.log('[ML Service] Loading Demand model into memory...')
+    demandModel = await tf.loadLayersModel(customBufferLoader(modelJsonText, weightArrayBuffer))
+    console.log(`[ML Service] Demand model loaded successfully. Tracking ${demandCategories.length} categories.`)
+    return true
+  } catch (error) {
+    console.error('[ML Service] Error loading Demand model from Supabase:', error)
+    return false
+  }
+}
+
+/**
  * Features extraction for no-show inference. Matches logic in trainNoShowModel.js
  */
 const extractFeaturesForPrediction = (cita) => {
@@ -186,5 +234,52 @@ export const predictDailyRevenue = async (dateString) => {
   } catch (error) {
     console.error('[ML Service] Error during Revenue prediction:', error)
     return 4000 // Fallback
+  }
+}
+
+/**
+ * Predicts the demand volume across categories for a specific day using the ML model.
+ * @param {String|Date} dateString - Date to predict
+ * @returns {Array} List of category demand objects
+ */
+export const predictDailyDemand = async (dateString) => {
+  if (!demandModel || demandCategories.length === 0) {
+    console.warn('[ML Service] Demand Model not loaded. Returning baseline fallback.')
+    return []
+  }
+
+  try {
+    const date = new Date(dateString)
+    const dayOfWeek = date.getDay()
+    const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6) ? 1 : 0
+    const month = date.getMonth()
+
+    const features = [dayOfWeek / 6, isWeekend, month / 11]
+    const inputTensor = tf.tensor2d([features])
+
+    // Predict
+    const predictionTensor = demandModel.predict(inputTensor)
+    const predictionArray = await predictionTensor.data()
+
+    // Cleanup
+    inputTensor.dispose()
+    predictionTensor.dispose()
+
+    // Map output probabilities to actual demand counts
+    const demandForecast = demandCategories.map((categoryName, index) => {
+      const normalizedFloat = Number(predictionArray[index] || 0)
+      const actualCountStr = (normalizedFloat * demandScaler).toFixed(1)
+      const actualCount = Math.max(0, Number(actualCountStr))
+
+      return {
+        category: categoryName,
+        expectedVol: actualCount
+      }
+    })
+
+    return demandForecast
+  } catch (error) {
+    console.error('[ML Service] Error during Demand prediction:', error)
+    return []
   }
 }

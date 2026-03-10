@@ -61,34 +61,15 @@ async function trainModel () {
   try {
     let data = await fetchTrainingData()
 
-    if (!data || data.length < 30) {
-      console.warn('Not enough historical days to train the financial model. Using synthetic data to bootstrap the AI.')
-
-      data = []
-      const today = new Date()
-      // Generate 180 days of fake daily revenue
-      for (let i = 0; i < 180; i++) {
-        const generationDate = new Date(today.getTime() - (i * 24 * 60 * 60 * 1000))
-        const dayOfWeek = generationDate.getDay()
-
-        // Artificial logic: Weekends bring $8k-$15k, Weekdays $2k-$6k
-        let randomRevenue = 0
-        if (dayOfWeek === 0 || dayOfWeek === 6) {
-          randomRevenue = 8000 + Math.random() * 7000
-        } else {
-          randomRevenue = 2000 + Math.random() * 4000
-        }
-
-        // Add a slight monthly trend (e.g. December is higher)
-        if (generationDate.getMonth() === 11) {
-          randomRevenue *= 1.3
-        }
-
-        data.push({
-          date: generationDate.toISOString().split('T')[0],
-          totalRevenue: randomRevenue
-        })
-      }
+    if (!data || data.length === 0) {
+      console.warn('The database is completely empty. Inserting a dummy zero row so the model compiles but predicts 0 until real data arrives.')
+      // Add a dummy record representing 0 revenue so the model doesn't crash
+      // when converting empty arrays to tensors.
+      const today = new Date().toISOString().split('T')[0]
+      data = [{
+        date: today,
+        totalRevenue: 0
+      }]
     }
 
     const features = []
