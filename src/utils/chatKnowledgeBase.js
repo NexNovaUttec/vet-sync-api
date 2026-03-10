@@ -31,21 +31,41 @@ export const knowledgeBase = [
     keywords: [
       'agendar cita',
       'hacer cita',
+      'como hago una cita',
+      'como hago la cita',
+      'como hago cita',
+      'como puedo hacer',
+      'como puedo agendar',
+      'quiero hacer una cita',
+      'quiero agendar',
+      'quiero pedir una cita',
       'solicitar cita',
       'pedir cita',
       'reservar cita',
       'como agendo',
+      'como saco cita',
+      'sacar cita',
       'nueva cita',
-      'programar cita'
+      'programar cita',
+      'apartar cita'
     ],
     answer:
-      'Para agendar una cita en VetSync:\n1. Inicia sesión en tu cuenta\n2. Ve a la sección "Citas" y haz clic en "Agendar"\n3. Selecciona la mascota, el servicio y al veterinario\n4. Elige la fecha y hora disponible\n5. Confirma tu cita — recibirás un resumen en pantalla ✅',
+      'Para agendar una cita en VetSync:\n\n1. Inicia sesión en tu cuenta\n2. Ve a la sección **"Citas"** y haz clic en **"Agendar"**\n3. Selecciona tu mascota, el servicio y el veterinario\n4. Elige la fecha y hora disponible\n5. Confirma — recibirás un resumen en pantalla ✅\n\nSi aún no tienes una cuenta, puedes crearla desde la pantalla de inicio de forma gratuita.',
     score: 2
   },
   {
-    keywords: ['cancelar cita', 'eliminar cita', 'borrar cita', 'quitar cita'],
+    keywords: [
+      'cancelar cita',
+      'eliminar cita',
+      'borrar cita',
+      'quitar cita',
+      'como cancelo',
+      'como cancelo mi cita',
+      'como cancelo una cita',
+      'deshacer cita'
+    ],
     answer:
-      'Para cancelar una cita:\n1. Ve a la sección "Citas"\n2. Busca la cita que deseas cancelar\n3. Haz clic en el botón de opciones y selecciona "Cancelar"\nTe recomendamos cancelar con al menos 24 horas de anticipación para liberar el espacio a otros pacientes.',
+      'Para cancelar una cita:\n\n1. Ve a la sección **"Citas"**\n2. Busca la cita que deseas cancelar\n3. Haz clic en el botón de opciones y selecciona **"Cancelar"**\n\n¡Recuerda cancelar con al menos **24 horas de anticipación** para liberar el espacio a otros pacientes.',
     score: 2
   },
   {
