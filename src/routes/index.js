@@ -13,6 +13,7 @@ import { servicesRouter } from '#routes/servicesRouter.js'
 import { categoriesRouter } from '#routes/categoriesRouter.js'
 import { appointmentsRouter } from '#routes/appointmentsRouter.js'
 import { chatRouter } from '#routes/chatRouter.js'
+import { mlRouter } from '#routes/ml.routes.js'
 
 export const router = Router()
 
@@ -41,3 +42,4 @@ router.use('/vets', vetRouter)
 router.use('/schedules', scheduleRouter)
 router.use('/categories', categoriesRouter)
 router.use('/appointments', appointmentsRouter)
+router.use('/ml', mlRouter)
