@@ -128,7 +128,7 @@ const formatServices = (services) => {
   return `Estos son los servicios disponibles en VetSync:\n\n${lines.join('\n')}\n\n---\nPuedes ver detalles completos y agendar en la sección **"Servicios"** de la plataforma.`
 }
 
-// Sinónimos y razas comunes (Extraído con IA) → nombre en la BD 
+// Sinónimos y razas comunes (Extraído con IA) → nombre en la BD
 const ANIMAL_SYNONYMS = {
   // Perro
   perro: 'perro', perros: 'perro', can: 'perro', canes: 'perro',
@@ -166,12 +166,12 @@ const ANIMAL_SYNONYMS = {
 // Quita sufijos diminutivos comunes en español
 const removeDiminutive = (word) => {
   return word
-    .replace(/citos?$/, '')   // -cito/-citos
-    .replace(/citas?$/, '')   // -cita/-citas
-    .replace(/itos?$/, '')    // -ito/-itos
-    .replace(/itas?$/, '')    // -ita/-itas
-    .replace(/ines?$/, 'in')  // -ines → -in (e.g. "pajarines" edge case)
-    || word
+    .replace(/citos?$/, '') // -cito/-citos
+    .replace(/citas?$/, '') // -cita/-citas
+    .replace(/itos?$/, '') // -ito/-itos
+    .replace(/itas?$/, '') // -ita/-itas
+    .replace(/ines?$/, 'in') || // -ines → -in (e.g. "pajarines" edge case)
+    word
 }
 
 // Palabras que se eliminan para extraer el nombre del animal buscado
