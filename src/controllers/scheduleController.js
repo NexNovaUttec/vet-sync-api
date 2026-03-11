@@ -62,7 +62,7 @@ export class ScheduleController {
       return res.status(422).json({ error: JSON.parse(error.message) })
     }
 
-    const { error: validationError } = await runValidation({ data })
+    const { error: validationError } = await runValidation({ data, scheduleId: Number(id) })
 
     if (validationError) {
       return res.status(422).json({ error: validationError })
